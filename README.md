@@ -2,9 +2,9 @@
 
 # Filament Employees
 
-[![Latest Stable Version](https://poser.pugx.org/tomatophp/filament-api/version.svg)](https://packagist.org/packages/tomatophp/filament-api)
-[![License](https://poser.pugx.org/tomatophp/filament-api/license.svg)](https://packagist.org/packages/tomatophp/filament-api)
-[![Downloads](https://poser.pugx.org/tomatophp/filament-api/d/total.svg)](https://packagist.org/packages/tomatophp/filament-api)
+[![Latest Stable Version](https://poser.pugx.org/tomatophp/filament-employees/version.svg)](https://packagist.org/packages/tomatophp/filament-employees)
+[![License](https://poser.pugx.org/tomatophp/filament-employees/license.svg)](https://packagist.org/packages/tomatophp/filament-employees)
+[![Downloads](https://poser.pugx.org/tomatophp/filament-employees/d/total.svg)](https://packagist.org/packages/tomatophp/filament-employees)
 
 Manage your employees with easy using Account builder and FilamentPHP
 
