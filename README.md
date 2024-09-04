@@ -1,6 +1,12 @@
-# Filament employees
+![Screenshot](https://raw.githubusercontent.com/tomatophp/filament-employees/master/arts/3x1io-tomato-employees.jpg)
 
-your package description will go here
+# Filament Employees
+
+[![Latest Stable Version](https://poser.pugx.org/tomatophp/filament-api/version.svg)](https://packagist.org/packages/tomatophp/filament-api)
+[![License](https://poser.pugx.org/tomatophp/filament-api/license.svg)](https://packagist.org/packages/tomatophp/filament-api)
+[![Downloads](https://poser.pugx.org/tomatophp/filament-api/d/total.svg)](https://packagist.org/packages/tomatophp/filament-api)
+
+Manage your employees with easy using Account builder and FilamentPHP
 
 ## Installation
 
@@ -57,7 +63,7 @@ Please see [SECURITY](SECURITY.md) for more information about security.
 
 ## Credits
 
-- [Tomatophp](mailto:info@3x1.io)
+- [Fady Mondy](mailto:info@3x1.io)
 
 ## License
 
