@@ -4,11 +4,14 @@ namespace TomatoPHP\FilamentEmployees;
 
 use Filament\Contracts\Plugin;
 use Filament\Panel;
+use TomatoPHP\FilamentAccounts\FilamentAccountsPlugin;
+use TomatoPHP\FilamentEmployees\Filament\Resources\AccountResource;
+use TomatoPHP\FilamentEmployees\Filament\Resources\AttendanceShiftResource;
+use TomatoPHP\FilamentEmployees\Filament\Resources\EmployeeApplyResource;
 
 
 class FilamentEmployeesPlugin implements Plugin
 {
-    protected array $routes = [];
     public function getId(): string
     {
         return 'filament-employees';
@@ -16,7 +19,14 @@ class FilamentEmployeesPlugin implements Plugin
 
     public function register(Panel $panel): void
     {
-        //
+        $panel->resources([
+           AccountResource::class,
+            AttendanceShiftResource::class,
+            EmployeeApplyResource::class
+        ])
+        ->pages([
+            Filament\Resources\AccountResource\Pages\Departments::class
+        ]);
     }
 
     public function boot(Panel $panel): void
