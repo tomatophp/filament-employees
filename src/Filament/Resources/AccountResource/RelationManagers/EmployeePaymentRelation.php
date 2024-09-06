@@ -11,6 +11,8 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use TomatoPHP\FilamentTypes\Components\TypeColumn;
+use TomatoPHP\FilamentTypes\Models\Type;
 
 class EmployeePaymentRelation extends RelationManager
 {
@@ -22,19 +24,14 @@ class EmployeePaymentRelation extends RelationManager
     {
         return $form
             ->schema([
-                Forms\Components\TextInput::make('user_id')
-                    ->numeric(),
-                Forms\Components\TextInput::make('account_id')
-                    ->required()
-                    ->numeric(),
                 Forms\Components\DateTimePicker::make('date'),
                 Forms\Components\TextInput::make('reason')
                     ->required()
-                    ->maxLength(255)
-                    ->default('payment'),
-                Forms\Components\TextInput::make('type')
+                    ->maxLength(255),
+                Forms\Components\Select::make('type')
+                    ->searchable()
                     ->required()
-                    ->maxLength(255)
+                    ->options(Type::query()->where('for', 'employees_payment')->where('type', 'type')->pluck('name', 'key')->toArray())
                     ->default('in'),
                 Forms\Components\Textarea::make('description')
                     ->columnSpanFull(),
@@ -42,8 +39,10 @@ class EmployeePaymentRelation extends RelationManager
                     ->required()
                     ->numeric()
                     ->default(0),
-                Forms\Components\TextInput::make('status')
-                    ->maxLength(255)
+                Forms\Components\Select::make('status')
+                    ->searchable()
+                    ->required()
+                    ->options(Type::query()->where('for', 'employees_payment')->where('type', 'status')->pluck('name', 'key')->toArray())
                     ->default('pending'),
                 Forms\Components\Toggle::make('is_approved'),
             ]);
@@ -54,12 +53,16 @@ class EmployeePaymentRelation extends RelationManager
         return $table
             ->headerActions([
                 Tables\Actions\CreateAction::make()
+                    ->using(function (array $data) {
+                        $data['user_id'] = auth()->user()->id;
+                        $data['account_id'] = $this->getOwnerRecord()->id;
+
+                        $record = EmployeePayment::create($data);
+                        return $record;
+                    }),
             ])
             ->columns([
-                Tables\Columns\TextColumn::make('user_id')
-                    ->numeric()
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('account_id')
+                Tables\Columns\TextColumn::make('user.name')
                     ->numeric()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('date')
@@ -72,7 +75,10 @@ class EmployeePaymentRelation extends RelationManager
                 Tables\Columns\TextColumn::make('total')
                     ->numeric()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('status')
+                TypeColumn::make('status')
+                    ->label(trans('Status'))
+                    ->toggleable()
+                    ->sortable()
                     ->searchable(),
                 Tables\Columns\IconColumn::make('is_approved')
                     ->boolean(),

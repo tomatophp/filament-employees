@@ -2,6 +2,7 @@
 
 namespace TomatoPHP\FilamentEmployees\Filament\Resources;
 
+use App\Models\User;
 use TomatoPHP\FilamentEmployees\Filament\Resources\EmployeeApplyResource\Pages;
 use TomatoPHP\FilamentEmployees\Filament\Resources\EmployeeApplyResource\RelationManagers;
 use TomatoPHP\FilamentEmployees\Models\EmployeeApply;
@@ -12,6 +13,8 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use TomatoPHP\FilamentTypes\Components\TypeColumn;
+use TomatoPHP\FilamentTypes\Models\Type;
 
 class EmployeeApplyResource extends Resource
 {
@@ -43,73 +46,130 @@ class EmployeeApplyResource extends Resource
     public static function form(Form $form): Form
     {
         return $form
+
             ->schema([
-                Forms\Components\TextInput::make('first_name')
-                    ->required()
-                    ->maxLength(255),
-                Forms\Components\TextInput::make('last_name')
-                    ->required()
-                    ->maxLength(255),
-                Forms\Components\Textarea::make('address')
-                    ->required()
-                    ->columnSpanFull(),
-                Forms\Components\TextInput::make('phone')
-                    ->tel()
-                    ->required()
-                    ->maxLength(255),
-                Forms\Components\TextInput::make('email')
-                    ->email()
-                    ->required()
-                    ->maxLength(255),
-                Forms\Components\DatePicker::make('birthday'),
-                Forms\Components\TextInput::make('id_type')
-                    ->required()
-                    ->maxLength(255)
-                    ->default('national'),
-                Forms\Components\TextInput::make('id_number')
-                    ->required()
-                    ->maxLength(255),
-                Forms\Components\TextInput::make('education_type')
-                    ->maxLength(255),
-                Forms\Components\TextInput::make('university')
-                    ->maxLength(255),
-                Forms\Components\TextInput::make('college')
-                    ->maxLength(255),
-                Forms\Components\TextInput::make('department')
-                    ->maxLength(255),
-                Forms\Components\TextInput::make('position')
-                    ->required()
-                    ->maxLength(255),
-                Forms\Components\Textarea::make('hr_cover_letter')
-                    ->columnSpanFull(),
-                Forms\Components\Toggle::make('has_insurance')
-                    ->required(),
-                Forms\Components\TextInput::make('insurance_number')
-                    ->maxLength(255),
-                Forms\Components\TextInput::make('explicated_salary')
-                    ->required()
-                    ->numeric()
-                    ->default(0),
-                Forms\Components\DatePicker::make('start_at'),
-                Forms\Components\TextInput::make('status')
-                    ->required()
-                    ->maxLength(255)
-                    ->default('pending'),
-                Forms\Components\Textarea::make('hr_notes')
-                    ->columnSpanFull(),
-                Forms\Components\Textarea::make('tech_notes')
-                    ->columnSpanFull(),
-                Forms\Components\Toggle::make('is_activated'),
-                Forms\Components\Toggle::make('ready_for_interview'),
-                Forms\Components\Toggle::make('hr_approved'),
-                Forms\Components\TextInput::make('hr_approved_by')
-                    ->numeric(),
-                Forms\Components\Toggle::make('tech_approved'),
-                Forms\Components\TextInput::make('tech_approved_by')
-                    ->numeric(),
-                Forms\Components\Toggle::make('is_approved'),
-                Forms\Components\TextInput::make('is_approved_by')
-                    ->numeric(),
+                Forms\Components\Grid::make([
+                    'md' => 12,
+                    'sm' => 1
+                ])->schema([
+                    Forms\Components\Grid::make()
+                        ->schema([
+                            Forms\Components\Section::make('Personal Information')
+                                ->schema([
+                                    Forms\Components\TextInput::make('first_name')
+                                        ->required()
+                                        ->maxLength(255),
+                                    Forms\Components\TextInput::make('last_name')
+                                        ->required()
+                                        ->maxLength(255),
+                                    Forms\Components\TextInput::make('phone')
+                                        ->tel()
+                                        ->required()
+                                        ->maxLength(255),
+                                    Forms\Components\TextInput::make('email')
+                                        ->email()
+                                        ->required()
+                                        ->maxLength(255),
+                                    Forms\Components\DatePicker::make('birthday'),
+                                    Forms\Components\Textarea::make('address')
+                                        ->columnSpanFull(),
+                                ])->columns(2),
+                            Forms\Components\Section::make('Job Details')
+                                ->schema([
+                                    Forms\Components\TextInput::make('position')
+                                        ->required()
+                                        ->maxLength(255),
+                                    Forms\Components\TextInput::make('explicated_salary')
+                                        ->required()
+                                        ->numeric()
+                                        ->default(0),
+                                    Forms\Components\DatePicker::make('start_at'),
+                                    Forms\Components\Select::make('id_type')
+                                        ->searchable()
+                                        ->options([
+                                            'id' => 'ID',
+                                            'passport' => 'Passport',
+                                            'visa' => 'Visa',
+                                        ])
+                                        ->default('id'),
+                                    Forms\Components\TextInput::make('id_number')
+                                        ->numeric(),
+                                    Forms\Components\Textarea::make('hr_cover_letter')
+                                        ->columnSpanFull(),
+                                ])->columns(3),
+                            Forms\Components\Section::make('Education')
+                                ->schema([
+                                    Forms\Components\Select::make('education_type')
+                                        ->default('university')
+                                        ->options([
+                                            'school' => 'School',
+                                            'university' => 'University',
+                                            'college' => 'College',
+                                        ]),
+                                    Forms\Components\TextInput::make('university'),
+                                    Forms\Components\TextInput::make('college'),
+                                    Forms\Components\TextInput::make('department'),
+                                ])->columns(2),
+                        ])
+                        ->columnSpan(8),
+                    Forms\Components\Grid::make()
+                        ->schema([
+                            Forms\Components\Section::make('Status')
+                                ->schema([
+                                    Forms\Components\Select::make('status')
+                                        ->searchable()
+                                        ->required()
+                                        ->options(Type::query()->where('for', 'employee_apply')->where('type', 'status')->pluck('name', 'key')->toArray())
+                                        ->default('pending'),
+                                    Forms\Components\Toggle::make('is_activated'),
+                                    Forms\Components\Toggle::make('ready_for_interview'),
+                                ]),
+                            Forms\Components\Section::make('Approval')
+                                ->schema([
+                                    Forms\Components\Toggle::make('hr_approved')
+                                        ->live()
+                                        ->default(false),
+                                    Forms\Components\Select::make('hr_approved_by')
+                                        ->visible(fn(Forms\Get $get) => $get('hr_approved'))
+                                        ->searchable()
+                                        ->required()
+                                        ->options(User::query()->pluck('name', 'id')->toArray()),
+                                    Forms\Components\Textarea::make('hr_notes')
+                                        ->visible(fn(Forms\Get $get) => $get('hr_approved'))
+                                        ->columnSpanFull(),
+                                    Forms\Components\Toggle::make('tech_approved')
+                                        ->live()
+                                        ->default(false),
+                                    Forms\Components\Select::make('tech_approved_by')
+                                        ->visible(fn(Forms\Get $get) => $get('tech_approved'))
+                                        ->searchable()
+                                        ->required()
+                                        ->options(User::query()->pluck('name', 'id')->toArray()),
+                                    Forms\Components\Textarea::make('tech_notes')
+                                        ->visible(fn(Forms\Get $get) => $get('tech_approved'))
+                                        ->columnSpanFull(),
+                                    Forms\Components\Toggle::make('is_approved')
+                                        ->live()
+                                        ->default(false),
+                                    Forms\Components\Select::make('is_approved_by')
+                                        ->visible(fn(Forms\Get $get) => $get('is_approved'))
+                                        ->searchable()
+                                        ->required()
+                                        ->options(User::query()->pluck('name', 'id')->toArray()),
+                                ]),
+                            Forms\Components\Section::make('Insurance')
+                                ->schema([
+                                    Forms\Components\Toggle::make('has_insurance')
+                                        ->default(false)
+                                        ->live(),
+                                    Forms\Components\TextInput::make('insurance_number')
+                                        ->visible(fn(Forms\Get $get) => $get('has_insurance'))
+                                        ->required()
+                                        ->maxLength(255),
+                                ]),
+                        ])
+                        ->columnSpan(4),
+                ])
             ]);
     }
 
@@ -125,54 +185,26 @@ class EmployeeApplyResource extends Resource
                     ->searchable(),
                 Tables\Columns\TextColumn::make('email')
                     ->searchable(),
-                Tables\Columns\TextColumn::make('birthday')
-                    ->date()
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('id_type')
-                    ->searchable(),
-                Tables\Columns\TextColumn::make('id_number')
-                    ->searchable(),
-                Tables\Columns\TextColumn::make('education_type')
-                    ->searchable(),
-                Tables\Columns\TextColumn::make('university')
-                    ->searchable(),
-                Tables\Columns\TextColumn::make('college')
-                    ->searchable(),
-                Tables\Columns\TextColumn::make('department')
-                    ->searchable(),
                 Tables\Columns\TextColumn::make('position')
                     ->searchable(),
-                Tables\Columns\IconColumn::make('has_insurance')
-                    ->boolean(),
-                Tables\Columns\TextColumn::make('insurance_number')
+                TypeColumn::make('status')
+                    ->label(trans('Status'))
+                    ->toggleable()
+                    ->sortable()
                     ->searchable(),
-                Tables\Columns\TextColumn::make('explicated_salary')
-                    ->numeric()
-                    ->sortable(),
                 Tables\Columns\TextColumn::make('start_at')
                     ->date()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('status')
-                    ->searchable(),
                 Tables\Columns\IconColumn::make('is_activated')
                     ->boolean(),
                 Tables\Columns\IconColumn::make('ready_for_interview')
                     ->boolean(),
                 Tables\Columns\IconColumn::make('hr_approved')
                     ->boolean(),
-                Tables\Columns\TextColumn::make('hr_approved_by')
-                    ->numeric()
-                    ->sortable(),
                 Tables\Columns\IconColumn::make('tech_approved')
                     ->boolean(),
-                Tables\Columns\TextColumn::make('tech_approved_by')
-                    ->numeric()
-                    ->sortable(),
                 Tables\Columns\IconColumn::make('is_approved')
                     ->boolean(),
-                Tables\Columns\TextColumn::make('is_approved_by')
-                    ->numeric()
-                    ->sortable(),
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()

@@ -2,6 +2,7 @@
 
 namespace TomatoPHP\FilamentEmployees\Filament\Resources\AccountResource\RelationManagers;
 
+use App\Models\Account;
 use Filament\Resources\RelationManagers\RelationManager;
 use TomatoPHP\FilamentEmployees\Models\EmployeePayroll;
 use Filament\Forms;
@@ -22,18 +23,18 @@ class EmployeePayrollRelation extends RelationManager
     {
         return $form
             ->schema([
-                Forms\Components\TextInput::make('user_id')
-                    ->required()
-                    ->numeric(),
-                Forms\Components\TextInput::make('account_id')
-                    ->required()
-                    ->numeric(),
                 Forms\Components\TextInput::make('year')
                     ->required()
-                    ->maxLength(255),
+                    ->maxLength(4)
+                    ->numeric()
+                    ->minValue(1900)
+                    ->maxValue(date('Y')),
                 Forms\Components\TextInput::make('month')
                     ->required()
-                    ->maxLength(255),
+                    ->maxLength(2)
+                    ->numeric()
+                    ->minValue(1)
+                    ->maxValue(12),
                 Forms\Components\DateTimePicker::make('date')
                     ->required(),
                 Forms\Components\TextInput::make('total_time')
@@ -57,9 +58,6 @@ class EmployeePayrollRelation extends RelationManager
                 Forms\Components\TextInput::make('tax')
                     ->numeric()
                     ->default(0),
-                Forms\Components\TextInput::make('total')
-                    ->numeric()
-                    ->default(0),
             ]);
     }
 
@@ -68,12 +66,18 @@ class EmployeePayrollRelation extends RelationManager
         return $table
             ->headerActions([
                 Tables\Actions\CreateAction::make()
+                    ->using(function (array $data) {
+                        $data['user_id'] = auth()->user()->id;
+                        $data['account_id'] = $this->getOwnerRecord()->id;
+
+                        $this->getTotal($data);
+
+                        $record = EmployeePayroll::create($data);
+                        return $record;
+                    }),
             ])
             ->columns([
-                Tables\Columns\TextColumn::make('user_id')
-                    ->numeric()
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('account_id')
+                Tables\Columns\TextColumn::make('user.name')
                     ->numeric()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('year')
@@ -127,5 +131,22 @@ class EmployeePayrollRelation extends RelationManager
                     Tables\Actions\DeleteBulkAction::make(),
                 ]),
             ]);
+    }
+
+    public function getTotal(&$data)
+    {
+        $employee = Account::find($data['account_id']);
+
+        $salary = $employee->salary;
+        $hour = $salary / 160;
+        $total = $data['total_time'] * $hour;
+        $overtime_delay = ($data['overtime_time'] - $data['delay_time']) * $hour;
+        $total += $overtime_delay;
+        $total -= ($data['offs_time'] * 8) * $hour;
+        $total += $data['out_date_payments'];
+        $total -= $data['subscription'];
+        $total -= $data['tax'];
+
+        $data["total"] = $total;
     }
 }

@@ -17,10 +17,18 @@ class ListAccounts extends ManageRecords
             Actions\CreateAction::make(),
             Actions\ActionGroup::make([
                 Actions\Action::make('departments')
-                    ->url(Departments::getUrl())
+                    ->label('Departments')
+                    ->url(Departments::getUrl()),
+                Actions\Action::make('employees_payment')
+                    ->label('Employee Payment Type')
+                    ->url(EmployeePaymentsType::getUrl()),
+                Actions\Action::make('employees_payment')
+                    ->label('Employee Payment Status')
+                    ->url(EmployeePaymentsStatus::getUrl()),
+                Actions\Action::make('employees_request')
+                    ->label('Employee Requests Status')
+                    ->url(EmployeeRequestsStatus::getUrl())
             ])
         ];
     }
-
-
 }

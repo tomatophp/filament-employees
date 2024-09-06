@@ -14,6 +14,12 @@ class ListEmployeeApplies extends ListRecords
     {
         return [
             Actions\CreateAction::make(),
+            Actions\Action::make('types')
+                ->icon('heroicon-s-cog')
+                ->tooltip('Apply Status')
+                ->label('Apply Status')
+                ->hiddenLabel()
+                ->url(EmployeeApplyStatus::getUrl())
         ];
     }
 }

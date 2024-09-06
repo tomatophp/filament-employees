@@ -20,12 +20,16 @@ class FilamentEmployeesPlugin implements Plugin
     public function register(Panel $panel): void
     {
         $panel->resources([
-           AccountResource::class,
+            AccountResource::class,
             AttendanceShiftResource::class,
             EmployeeApplyResource::class
         ])
         ->pages([
-            Filament\Resources\AccountResource\Pages\Departments::class
+            Filament\Resources\AccountResource\Pages\EmployeePaymentsStatus::class,
+            Filament\Resources\AccountResource\Pages\EmployeePaymentsType::class,
+            Filament\Resources\AccountResource\Pages\EmployeeRequestsStatus::class,
+            Filament\Resources\AccountResource\Pages\Departments::class,
+            Filament\Resources\EmployeeApplyResource\Pages\EmployeeApplyStatus::class,
         ]);
     }
 

@@ -11,6 +11,8 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use TomatoPHP\FilamentTypes\Components\TypeColumn;
+use TomatoPHP\FilamentTypes\Models\Type;
 
 class EmployeeRequestRelation extends RelationManager
 {
@@ -22,11 +24,6 @@ class EmployeeRequestRelation extends RelationManager
     {
         return $form
             ->schema([
-                Forms\Components\TextInput::make('account_id')
-                    ->required()
-                    ->numeric(),
-                Forms\Components\TextInput::make('user_id')
-                    ->numeric(),
                 Forms\Components\TextInput::make('type')
                     ->maxLength(255)
                     ->default('holiday'),
@@ -44,8 +41,10 @@ class EmployeeRequestRelation extends RelationManager
                     ->columnSpanFull(),
                 Forms\Components\TextInput::make('request_by')
                     ->numeric(),
-                Forms\Components\TextInput::make('status')
-                    ->maxLength(255)
+                Forms\Components\Select::make('status')
+                    ->searchable()
+                    ->required()
+                    ->options(Type::query()->where('for', 'employees_request')->where('type', 'status')->pluck('name', 'key')->toArray())
                     ->default('pending'),
                 Forms\Components\Toggle::make('is_activated'),
                 Forms\Components\Toggle::make('is_approved'),
@@ -57,12 +56,16 @@ class EmployeeRequestRelation extends RelationManager
         return $table
             ->headerActions([
                 Tables\Actions\CreateAction::make()
+                    ->using(function (array $data) {
+                        $data['user_id'] = auth()->user()->id;
+                        $data['account_id'] = $this->getOwnerRecord()->id;
+
+                        $record = EmployeeRequest::create($data);
+                        return $record;
+                    }),
             ])
             ->columns([
-                Tables\Columns\TextColumn::make('account_id')
-                    ->numeric()
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('user_id')
+                Tables\Columns\TextColumn::make('user.name')
                     ->numeric()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('type')
@@ -82,7 +85,10 @@ class EmployeeRequestRelation extends RelationManager
                 Tables\Columns\TextColumn::make('request_by')
                     ->numeric()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('status')
+                TypeColumn::make('status')
+                    ->label(trans('Status'))
+                    ->toggleable()
+                    ->sortable()
                     ->searchable(),
                 Tables\Columns\IconColumn::make('is_activated')
                     ->boolean(),
