@@ -41,6 +41,7 @@ class EmployeeAttendanceRelation extends RelationManager
                     ->time('H:i A')
                     ->required(),
                 Forms\Components\TimePicker::make('out_at')
+                    ->minDate(fn(Forms\Get $get) => Carbon::parse($get('in_at'))->addHour()->toTimeString())
                     ->time('H:i A'),
                 Forms\Components\Textarea::make('notes')
                     ->columnSpanFull(),
@@ -127,6 +128,7 @@ class EmployeeAttendanceRelation extends RelationManager
         $total = 0;
         $delay = 0;
         $overtime = 0;
+        $overTimeInNagtive = 0;
         if(!empty($data['out_at']) && !empty($data['in_at'])){
             $total = Carbon::parse($data['in_at'])->diffInMinutes(Carbon::parse($data['out_at']));
             $attendanceShift = AttendanceShift::find($this->getOwnerRecord()->meta('attendance_shift_id'));
@@ -139,7 +141,7 @@ class EmployeeAttendanceRelation extends RelationManager
 
         }
         $data["total"] = $total/60;
-        $data["delay"] = ($delay/60) > 0 ? $delay/60 : 0;
-        $data["overtime"] = ($overtime/60) > 0 ? $overtime/60 : ($overTimeInNagtive?:0);
+        $data["delay"] = $delay > 0 ? (($delay/60) > 0 ? $delay/60 : 0) : 0;
+        $data["overtime"] = $overtime > 0 ? (($overtime/60) > 0 ? $overtime/60 : ($overTimeInNagtive?:0)) : 0;
     }
 }

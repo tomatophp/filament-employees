@@ -20,7 +20,7 @@ class ListAccounts extends ManageRecords
                     ->label('Departments')
                     ->url(Departments::getUrl()),
                 Actions\Action::make('employees_payment')
-                    ->label('Employee Payment Type')
+                    ->label('Employee Payment Reasons')
                     ->url(EmployeePaymentsType::getUrl()),
                 Actions\Action::make('employees_payment')
                     ->label('Employee Payment Status')

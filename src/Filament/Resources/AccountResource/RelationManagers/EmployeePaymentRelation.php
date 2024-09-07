@@ -25,13 +25,27 @@ class EmployeePaymentRelation extends RelationManager
         return $form
             ->schema([
                 Forms\Components\DateTimePicker::make('date'),
-                Forms\Components\TextInput::make('reason')
-                    ->required()
-                    ->maxLength(255),
+                Forms\Components\Select::make('reason')
+                    ->searchable()
+                    ->default('reward')
+                    ->live()
+                    ->afterStateUpdated(function (Forms\Get $get, Forms\Set $set){
+                        if(str($get('reason'))->contains(['reward', 'bonus', 'payroll'])) {
+                            $set('type', 'in');
+                        } else {
+                            $set('type', 'out');
+                        }
+                    })
+                    ->options(Type::query()->where('for', 'employee_payments')->where('type', 'reason')->pluck('name', 'key')->toArray())
+                    ->required(),
                 Forms\Components\Select::make('type')
+                    ->columnSpanFull()
                     ->searchable()
                     ->required()
-                    ->options(Type::query()->where('for', 'employees_payment')->where('type', 'type')->pluck('name', 'key')->toArray())
+                    ->options([
+                        'in' => 'In',
+                        'out' => 'Out',
+                    ])
                     ->default('in'),
                 Forms\Components\Textarea::make('description')
                     ->columnSpanFull(),
@@ -44,7 +58,6 @@ class EmployeePaymentRelation extends RelationManager
                     ->required()
                     ->options(Type::query()->where('for', 'employees_payment')->where('type', 'status')->pluck('name', 'key')->toArray())
                     ->default('pending'),
-                Forms\Components\Toggle::make('is_approved'),
             ]);
     }
 
@@ -80,8 +93,7 @@ class EmployeePaymentRelation extends RelationManager
                     ->toggleable()
                     ->sortable()
                     ->searchable(),
-                Tables\Columns\IconColumn::make('is_approved')
-                    ->boolean(),
+                Tables\Columns\ToggleColumn::make('is_approved'),
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
