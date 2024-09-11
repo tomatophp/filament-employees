@@ -1,7 +1,7 @@
 {
     "name": "tomatophp/filament-employees",
     "type": "library",
-    "description": "Manage your employees with easy using Account builder and FilamentPHP\n\n",
+    "description": "Manage your employees with easy using Account builder and FilamentPHP",
     "keywords": [
         "php",
         "laravel",
