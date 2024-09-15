@@ -39,7 +39,8 @@
     "require": {
         "php": "^8.1",
         "tomatophp/console-helpers": "^1.1",
-        "tomatophp/filament-accounts": "2.0",
-        "tomatophp/filament-types": "1.0"
+        "filament/filament": "^3.2",
+        "tomatophp/filament-accounts": "^2.0",
+        "tomatophp/filament-types": "^1.0"
     }
 }
