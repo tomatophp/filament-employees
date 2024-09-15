@@ -1,15 +1,15 @@
 <?php
 
-namespace TomatoPHP\FilamentEmployees\Filament\Resources\AccountResource\Pages;
+namespace TomatoPHP\FilamentEmployees\Filament\Resources\EmployeeResource\Pages;
 
 use Filament\Resources\Pages\ManageRecords;
-use TomatoPHP\FilamentEmployees\Filament\Resources\AccountResource;
+use TomatoPHP\FilamentEmployees\Filament\Resources\EmployeeResource;
 use Filament\Actions;
 use Filament\Resources\Pages\ListRecords;
 
 class ListAccounts extends ManageRecords
 {
-    protected static string $resource = AccountResource::class;
+    protected static string $resource = EmployeeResource::class;
 
     protected function getHeaderActions(): array
     {

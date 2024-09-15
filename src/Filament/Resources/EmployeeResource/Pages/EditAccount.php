@@ -1,14 +1,14 @@
 <?php
 
-namespace TomatoPHP\FilamentEmployees\Filament\Resources\AccountResource\Pages;
+namespace TomatoPHP\FilamentEmployees\Filament\Resources\EmployeeResource\Pages;
 
-use TomatoPHP\FilamentEmployees\Filament\Resources\AccountResource;
+use TomatoPHP\FilamentEmployees\Filament\Resources\EmployeeResource;
 use Filament\Actions;
 use Filament\Resources\Pages\EditRecord;
 
 class EditAccount extends EditRecord
 {
-    protected static string $resource = AccountResource::class;
+    protected static string $resource = EmployeeResource::class;
 
     protected function getHeaderActions(): array
     {

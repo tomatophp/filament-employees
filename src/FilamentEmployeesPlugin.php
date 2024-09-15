@@ -5,7 +5,7 @@ namespace TomatoPHP\FilamentEmployees;
 use Filament\Contracts\Plugin;
 use Filament\Panel;
 use TomatoPHP\FilamentAccounts\FilamentAccountsPlugin;
-use TomatoPHP\FilamentEmployees\Filament\Resources\AccountResource;
+use TomatoPHP\FilamentEmployees\Filament\Resources\EmployeeResource;
 use TomatoPHP\FilamentEmployees\Filament\Resources\AttendanceShiftResource;
 use TomatoPHP\FilamentEmployees\Filament\Resources\EmployeeApplyResource;
 
@@ -20,15 +20,15 @@ class FilamentEmployeesPlugin implements Plugin
     public function register(Panel $panel): void
     {
         $panel->resources([
-            AccountResource::class,
+            EmployeeResource::class,
             AttendanceShiftResource::class,
             EmployeeApplyResource::class
         ])
         ->pages([
-            Filament\Resources\AccountResource\Pages\EmployeePaymentsStatus::class,
-            Filament\Resources\AccountResource\Pages\EmployeePaymentsType::class,
-            Filament\Resources\AccountResource\Pages\EmployeeRequestsStatus::class,
-            Filament\Resources\AccountResource\Pages\Departments::class,
+            Filament\Resources\EmployeeResource\Pages\EmployeePaymentsStatus::class,
+            Filament\Resources\EmployeeResource\Pages\EmployeePaymentsType::class,
+            Filament\Resources\EmployeeResource\Pages\EmployeeRequestsStatus::class,
+            Filament\Resources\EmployeeResource\Pages\Departments::class,
             Filament\Resources\EmployeeApplyResource\Pages\EmployeeApplyStatus::class,
         ]);
     }

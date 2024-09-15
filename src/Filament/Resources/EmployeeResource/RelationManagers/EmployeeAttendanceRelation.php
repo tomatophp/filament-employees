@@ -1,6 +1,6 @@
 <?php
 
-namespace TomatoPHP\FilamentEmployees\Filament\Resources\AccountResource\RelationManagers;
+namespace TomatoPHP\FilamentEmployees\Filament\Resources\EmployeeResource\RelationManagers;
 
 use Filament\Resources\RelationManagers\RelationManager;
 use Illuminate\Support\Carbon;

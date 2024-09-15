@@ -1,6 +1,6 @@
 <?php
 
-namespace TomatoPHP\FilamentEmployees\Filament\Resources\AccountResource\RelationManagers;
+namespace TomatoPHP\FilamentEmployees\Filament\Resources\EmployeeResource\RelationManagers;
 
 use App\Models\Account;
 use Filament\Resources\RelationManagers\RelationManager;

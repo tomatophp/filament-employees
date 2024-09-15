@@ -5,8 +5,8 @@ namespace TomatoPHP\FilamentEmployees\Filament\Resources;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules\Password;
 use TomatoPHP\FilamentAccounts\Components\AccountColumn;
-use TomatoPHP\FilamentEmployees\Filament\Resources\AccountResource\Pages;
-use TomatoPHP\FilamentEmployees\Filament\Resources\AccountResource\RelationManagers;
+use TomatoPHP\FilamentEmployees\Filament\Resources\EmployeeResource\Pages;
+use TomatoPHP\FilamentEmployees\Filament\Resources\EmployeeResource\RelationManagers;
 use App\Models\Account;
 use Filament\Forms;
 use Filament\Forms\Form;
@@ -18,7 +18,7 @@ use Illuminate\Database\Eloquent\SoftDeletingScope;
 use TomatoPHP\FilamentEmployees\Models\AttendanceShift;
 use TomatoPHP\FilamentTypes\Models\Type;
 
-class AccountResource extends Resource
+class EmployeeResource extends Resource
 {
     protected static ?string $model = Account::class;
 
