@@ -2,16 +2,17 @@
 
 namespace TomatoPHP\FilamentEmployees\Filament\Resources\EmployeeResource\RelationManagers;
 
-use App\Models\Account;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\CreateAction;
+use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\EditAction;
+use Filament\Forms\Components\DateTimePicker;
+use Filament\Forms\Components\TextInput;
 use Filament\Resources\RelationManagers\RelationManager;
-use TomatoPHP\FilamentEmployees\Models\EmployeePayroll;
-use Filament\Forms;
-use Filament\Forms\Form;
-use Filament\Resources\Resource;
-use Filament\Tables;
+use Filament\Schemas\Schema;
+use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
+use TomatoPHP\FilamentEmployees\Models\EmployeePayroll;
 
 class EmployeePayrollRelation extends RelationManager
 {
@@ -19,43 +20,43 @@ class EmployeePayrollRelation extends RelationManager
 
     protected static ?string $title = 'Payrolls';
 
-    public function form(Form $form): Form
+    public function form(Schema $schema): Schema
     {
-        return $form
-            ->schema([
-                Forms\Components\TextInput::make('year')
+        return $schema
+            ->components([
+                TextInput::make('year')
                     ->required()
                     ->maxLength(4)
                     ->numeric()
                     ->minValue(1900)
                     ->maxValue(date('Y')),
-                Forms\Components\TextInput::make('month')
+                TextInput::make('month')
                     ->required()
                     ->maxLength(2)
                     ->numeric()
                     ->minValue(1)
                     ->maxValue(12),
-                Forms\Components\DateTimePicker::make('date')
+                DateTimePicker::make('date')
                     ->required(),
-                Forms\Components\TextInput::make('total_time')
+                TextInput::make('total_time')
                     ->numeric()
                     ->default(0),
-                Forms\Components\TextInput::make('offs_time')
+                TextInput::make('offs_time')
                     ->numeric()
                     ->default(0),
-                Forms\Components\TextInput::make('overtime_time')
+                TextInput::make('overtime_time')
                     ->numeric()
                     ->default(0),
-                Forms\Components\TextInput::make('delay_time')
+                TextInput::make('delay_time')
                     ->numeric()
                     ->default(0),
-                Forms\Components\TextInput::make('out_date_payments')
+                TextInput::make('out_date_payments')
                     ->numeric()
                     ->default(0),
-                Forms\Components\TextInput::make('subscription')
+                TextInput::make('subscription')
                     ->numeric()
                     ->default(0),
-                Forms\Components\TextInput::make('tax')
+                TextInput::make('tax')
                     ->numeric()
                     ->default(0),
             ]);
@@ -65,7 +66,7 @@ class EmployeePayrollRelation extends RelationManager
     {
         return $table
             ->headerActions([
-                Tables\Actions\CreateAction::make()
+                CreateAction::make()
                     ->using(function (array $data) {
                         $data['user_id'] = auth()->user()->id;
                         $data['account_id'] = $this->getOwnerRecord()->id;
@@ -73,49 +74,50 @@ class EmployeePayrollRelation extends RelationManager
                         $this->getTotal($data);
 
                         $record = EmployeePayroll::create($data);
+
                         return $record;
                     }),
             ])
             ->columns([
-                Tables\Columns\TextColumn::make('user.name')
+                TextColumn::make('user.name')
                     ->numeric()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('year')
+                TextColumn::make('year')
                     ->searchable(),
-                Tables\Columns\TextColumn::make('month')
+                TextColumn::make('month')
                     ->searchable(),
-                Tables\Columns\TextColumn::make('date')
+                TextColumn::make('date')
                     ->dateTime()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('total_time')
+                TextColumn::make('total_time')
                     ->numeric()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('offs_time')
+                TextColumn::make('offs_time')
                     ->numeric()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('overtime_time')
+                TextColumn::make('overtime_time')
                     ->numeric()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('delay_time')
+                TextColumn::make('delay_time')
                     ->numeric()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('out_date_payments')
+                TextColumn::make('out_date_payments')
                     ->numeric()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('subscription')
+                TextColumn::make('subscription')
                     ->numeric()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('tax')
+                TextColumn::make('tax')
                     ->numeric()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('total')
+                TextColumn::make('total')
                     ->numeric()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('created_at')
+                TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
-                Tables\Columns\TextColumn::make('updated_at')
+                TextColumn::make('updated_at')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
@@ -123,21 +125,21 @@ class EmployeePayrollRelation extends RelationManager
             ->filters([
                 //
             ])
-            ->actions([
-                Tables\Actions\EditAction::make(),
+            ->recordActions([
+                EditAction::make(),
             ])
-            ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
+            ->toolbarActions([
+                BulkActionGroup::make([
+                    DeleteBulkAction::make(),
                 ]),
             ]);
     }
 
     public function getTotal(&$data)
     {
-        $employee = Account::find($data['account_id']);
+        $employee = config('filament-accounts.model')::find($data['account_id']);
 
-        $salary = $employee->salary;
+        $salary = (float) ($employee?->meta('salary') ?? 0);
         $hour = $salary / 160;
         $total = $data['total_time'] * $hour;
         $overtime_delay = ($data['overtime_time'] - $data['delay_time']) * $hour;
@@ -147,6 +149,6 @@ class EmployeePayrollRelation extends RelationManager
         $total -= $data['subscription'];
         $total -= $data['tax'];
 
-        $data["total"] = $total;
+        $data['total'] = $total;
     }
 }

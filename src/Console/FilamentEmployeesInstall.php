@@ -28,7 +28,6 @@ class FilamentEmployeesInstall extends Command
         parent::__construct();
     }
 
-
     /**
      * Execute the console command.
      *
@@ -38,10 +37,8 @@ class FilamentEmployeesInstall extends Command
     {
         $this->info('Publish Vendor Assets');
         $this->callSilent('optimize:clear');
-        $this->yarnCommand(['install']);
-        $this->yarnCommand(['build']);
-        $this->artisanCommand(["migrate"]);
-        $this->artisanCommand(["optimize:clear"]);
-        $this->info('filamentEmployees installed successfully.');
+        $this->artisanCommand(['migrate']);
+        $this->artisanCommand(['optimize:clear']);
+        $this->info('Filament Employees installed successfully.');
     }
 }

@@ -2,9 +2,9 @@
 
 namespace TomatoPHP\FilamentEmployees\Filament\Resources\AttendanceShiftResource\Pages;
 
-use TomatoPHP\FilamentEmployees\Filament\Resources\AttendanceShiftResource;
-use Filament\Actions;
+use Filament\Actions\DeleteAction;
 use Filament\Resources\Pages\EditRecord;
+use TomatoPHP\FilamentEmployees\Filament\Resources\AttendanceShiftResource;
 
 class EditAttendanceShift extends EditRecord
 {
@@ -13,7 +13,7 @@ class EditAttendanceShift extends EditRecord
     protected function getHeaderActions(): array
     {
         return [
-            Actions\DeleteAction::make(),
+            DeleteAction::make(),
         ];
     }
 }

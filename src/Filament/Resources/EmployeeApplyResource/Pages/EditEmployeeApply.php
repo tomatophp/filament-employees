@@ -2,9 +2,9 @@
 
 namespace TomatoPHP\FilamentEmployees\Filament\Resources\EmployeeApplyResource\Pages;
 
-use TomatoPHP\FilamentEmployees\Filament\Resources\EmployeeApplyResource;
-use Filament\Actions;
+use Filament\Actions\DeleteAction;
 use Filament\Resources\Pages\EditRecord;
+use TomatoPHP\FilamentEmployees\Filament\Resources\EmployeeApplyResource;
 
 class EditEmployeeApply extends EditRecord
 {
@@ -13,7 +13,7 @@ class EditEmployeeApply extends EditRecord
     protected function getHeaderActions(): array
     {
         return [
-            Actions\DeleteAction::make(),
+            DeleteAction::make(),
         ];
     }
 }

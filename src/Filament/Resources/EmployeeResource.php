@@ -2,25 +2,42 @@
 
 namespace TomatoPHP\FilamentEmployees\Filament\Resources;
 
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\EditAction;
+use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\Hidden;
+use Filament\Forms\Components\Repeater;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
+use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Toggle;
+use Filament\Resources\Resource;
+use Filament\Schemas\Components\Grid;
+use Filament\Schemas\Components\Section;
+use Filament\Schemas\Components\Utilities\Get;
+use Filament\Schemas\Components\Utilities\Set;
+use Filament\Schemas\Schema;
+use Filament\Tables\Columns\IconColumn;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules\Password;
 use TomatoPHP\FilamentAccounts\Components\AccountColumn;
-use TomatoPHP\FilamentEmployees\Filament\Resources\EmployeeResource\Pages;
-use TomatoPHP\FilamentEmployees\Filament\Resources\EmployeeResource\RelationManagers;
-use App\Models\Account;
-use Filament\Forms;
-use Filament\Forms\Form;
-use Filament\Resources\Resource;
-use Filament\Tables;
-use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
+use TomatoPHP\FilamentEmployees\Filament\Resources\EmployeeResource\Pages\EditAccount;
+use TomatoPHP\FilamentEmployees\Filament\Resources\EmployeeResource\Pages\ListAccounts;
+use TomatoPHP\FilamentEmployees\Filament\Resources\EmployeeResource\RelationManagers\EmployeeAttendanceRelation;
+use TomatoPHP\FilamentEmployees\Filament\Resources\EmployeeResource\RelationManagers\EmployeePaymentRelation;
+use TomatoPHP\FilamentEmployees\Filament\Resources\EmployeeResource\RelationManagers\EmployeePayrollRelation;
+use TomatoPHP\FilamentEmployees\Filament\Resources\EmployeeResource\RelationManagers\EmployeeRequestRelation;
 use TomatoPHP\FilamentEmployees\Models\AttendanceShift;
 use TomatoPHP\FilamentTypes\Models\Type;
 
 class EmployeeResource extends Resource
 {
-    protected static ?string $model = Account::class;
+    protected static ?string $model = null;
 
     public static function getModel(): string
     {
@@ -29,76 +46,75 @@ class EmployeeResource extends Resource
 
     public static function getNavigationGroup(): ?string
     {
-        return "HRMS";
+        return 'HRMS';
     }
 
     public static function getPluralLabel(): ?string
     {
-        return "Employees";
+        return 'Employees';
     }
 
     public static function getLabel(): ?string
     {
-        return "Employee";
+        return 'Employee';
     }
 
     public static function getNavigationLabel(): string
     {
-        return "Employees";
+        return 'Employees';
     }
 
+    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-user-circle';
 
-    protected static ?string $navigationIcon = 'heroicon-o-user-circle';
-
-    public static function form(Form $form): Form
+    public static function form(Schema $schema): Schema
     {
-        return $form
-            ->schema(fn($record) => $record ? [
-                Forms\Components\Grid::make([
+        return $schema
+            ->components(fn ($record) => $record ? [
+                Grid::make([
                     'md' => 12,
-                    'sm' => 1
-                ])
+                    'sm' => 1,
+                ])->columnSpanFull()
                     ->schema([
-                        Forms\Components\Grid::make()
+                        Grid::make(1)
                             ->schema([
-                                Forms\Components\Section::make('Main Info')
+                                Section::make('Main Info')
                                     ->schema([
-                                        Forms\Components\SpatieMediaLibraryFileUpload::make('avatar')
+                                        SpatieMediaLibraryFileUpload::make('avatar')
                                             ->collection('avatar')
                                             ->columnSpan(2)
                                             ->avatar()
                                             ->image()
                                             ->alignCenter()
                                             ->hiddenLabel()
-                                            ->label(trans('filament-accounts::messages.accounts.coulmns.avatar')),
-                                        Forms\Components\TextInput::make('name')
+                                            ->label(trans('filament-accounts::messages.accounts.columns.avatar')),
+                                        TextInput::make('name')
                                             ->columnSpanFull()
                                             ->maxLength(255),
-                                        Forms\Components\TextInput::make('email')
+                                        TextInput::make('email')
                                             ->email()
-                                            ->afterStateUpdated(function (Forms\Set $set, Forms\Get $get){
+                                            ->afterStateUpdated(function (Set $set, Get $get) {
                                                 $set('username', $get('email'));
                                             })
                                             ->lazy()
-                                            ->unique('accounts', 'email', ignorable: fn($record) => $record)
+                                            ->unique('accounts', 'email', ignorable: fn ($record) => $record)
                                             ->maxLength(255),
-                                        Forms\Components\Hidden::make('username'),
-                                        Forms\Components\Hidden::make('type')->default('employee'),
-                                        Forms\Components\TextInput::make('phone')
+                                        Hidden::make('username'),
+                                        Hidden::make('type')->default('employee'),
+                                        TextInput::make('phone')
                                             ->tel()
                                             ->maxLength(255),
-                                        Forms\Components\Textarea::make('address')
+                                        Textarea::make('address')
                                             ->columnSpanFull(),
                                     ])
                                     ->columns(2),
-                                Forms\Components\Section::make('National Info')
+                                Section::make('National Info')
                                     ->schema([
-                                        Forms\Components\TextInput::make('first_name'),
-                                        Forms\Components\TextInput::make('middle_name'),
-                                        Forms\Components\TextInput::make('last_name'),
-                                        Forms\Components\TextInput::make('position')->columnSpanFull(),
-                                        Forms\Components\TextInput::make('nationality'),
-                                        Forms\Components\Select::make('national_id_type')
+                                        TextInput::make('first_name'),
+                                        TextInput::make('middle_name'),
+                                        TextInput::make('last_name'),
+                                        TextInput::make('position')->columnSpanFull(),
+                                        TextInput::make('nationality'),
+                                        Select::make('national_id_type')
                                             ->searchable()
                                             ->options([
                                                 'id' => 'ID',
@@ -106,21 +122,21 @@ class EmployeeResource extends Resource
                                                 'visa' => 'Visa',
                                             ])
                                             ->default('id'),
-                                        Forms\Components\TextInput::make('national_id')
+                                        TextInput::make('national_id')
                                             ->numeric(),
-                                        Forms\Components\DatePicker::make('brithday')->date(),
-                                        Forms\Components\Select::make('geneder')
+                                        DatePicker::make('brithday')->date(),
+                                        Select::make('geneder')
                                             ->options([
-                                                "male" => "Male",
-                                                "female" => "Female"
+                                                'male' => 'Male',
+                                                'female' => 'Female',
                                             ]),
 
-                                        Forms\Components\TextInput::make('vacations')
+                                        TextInput::make('vacations')
                                             ->numeric()
                                             ->default(0),
-                                        Forms\Components\Datepicker::make('contract_start'),
-                                        Forms\Components\Datepicker::make('contract_end'),
-                                        Forms\Components\Select::make('status')
+                                        DatePicker::make('contract_start'),
+                                        DatePicker::make('contract_end'),
+                                        Select::make('status')
                                             ->options([
                                                 'active' => 'Active',
                                                 'inactive' => 'Inactive',
@@ -128,88 +144,88 @@ class EmployeeResource extends Resource
                                                 'terminated' => 'Terminated',
                                             ]),
                                     ])->columns(3),
-                                Forms\Components\Section::make('Education')
+                                Section::make('Education')
                                     ->schema([
-                                        Forms\Components\Toggle::make('has_education')
+                                        Toggle::make('has_education')
                                             ->live()
                                             ->columnSpanFull()
                                             ->default(false),
-                                        Forms\Components\Select::make('education_type')
+                                        Select::make('education_type')
                                             ->default('university')
                                             ->options([
                                                 'school' => 'School',
                                                 'university' => 'University',
                                                 'college' => 'College',
                                             ])
-                                            ->visible(fn(Forms\Get $get) => $get('has_education')),
-                                        Forms\Components\TextInput::make('university')
-                                            ->visible(fn(Forms\Get $get) => $get('has_education')),
-                                        Forms\Components\TextInput::make('college')
-                                            ->visible(fn(Forms\Get $get) => $get('has_education')),
-                                        Forms\Components\TextInput::make('college_department')
-                                            ->visible(fn(Forms\Get $get) => $get('has_education')),
+                                            ->visible(fn (Get $get) => $get('has_education')),
+                                        TextInput::make('university')
+                                            ->visible(fn (Get $get) => $get('has_education')),
+                                        TextInput::make('college')
+                                            ->visible(fn (Get $get) => $get('has_education')),
+                                        TextInput::make('college_department')
+                                            ->visible(fn (Get $get) => $get('has_education')),
                                     ])->columns(2),
-                                Forms\Components\Section::make('CV')
+                                Section::make('CV')
                                     ->schema([
-                                        Forms\Components\Toggle::make('has_links')
+                                        Toggle::make('has_links')
                                             ->live()
                                             ->default(false),
-                                        Forms\Components\Repeater::make('links')
-                                            ->visible(fn(Forms\Get $get) => $get('has_links'))
+                                        Repeater::make('links')
+                                            ->visible(fn (Get $get) => $get('has_links'))
                                             ->schema([
-                                                Forms\Components\TextInput::make('name'),
-                                                Forms\Components\TextInput::make('link'),
+                                                TextInput::make('name'),
+                                                TextInput::make('link'),
                                             ]),
                                     ]),
                             ])
                             ->columnSpan(8),
-                        Forms\Components\Grid::make()
+                        Grid::make(1)
                             ->schema([
-                                Forms\Components\Section::make('Auth')
+                                Section::make('Auth')
                                     ->schema([
-                                        Forms\Components\Toggle::make('is_active')
+                                        Toggle::make('is_active')
                                             ->required(),
-                                        Forms\Components\Toggle::make('is_login')
+                                        Toggle::make('is_login')
                                             ->default(false)
                                             ->live(),
-                                        Forms\Components\TextInput::make('password')
+                                        TextInput::make('password')
                                             ->confirmed()
-                                            ->hidden(fn(Forms\Get $get) => !$get('is_login'))
+                                            ->hidden(fn (Get $get) => ! $get('is_login'))
                                             ->rule(Password::default())
                                             ->dehydrateStateUsing(fn ($state) => Hash::make($state))
                                             ->same('password_confirmation')
                                             ->revealable(filament()->arePasswordsRevealable())
                                             ->password()
                                             ->maxLength(255),
-                                        Forms\Components\TextInput::make('password_confirmation')
-                                            ->hidden(fn(Forms\Get $get) => !$get('is_login'))
+                                        TextInput::make('password_confirmation')
+                                            ->hidden(fn (Get $get) => ! $get('is_login'))
                                             ->password()
                                             ->revealable(filament()->arePasswordsRevealable())
                                             ->required()
                                             ->dehydrated(false),
                                     ]),
-                                Forms\Components\Section::make('Attendance')
+                                Section::make('Attendance')
                                     ->schema([
-                                        Forms\Components\Select::make('department')
+                                        Select::make('department')
                                             ->label('Department')
                                             ->searchable()
                                             ->live()
                                             ->preload()
                                             ->options(Type::query()->where('for', 'employees')->where('type', 'departments')->pluck('name', 'key')->toArray())
                                             ->nullable(),
-                                        Forms\Components\Select::make('attendance_shift_id')
-                                            ->disabled(fn(Forms\Get $get) => !$get('department'))
+                                        Select::make('attendance_shift_id')
+                                            ->disabled(fn (Get $get) => ! $get('department'))
                                             ->label('Attendance Shift')
                                             ->searchable()
-                                            ->options(fn(Forms\Get $get) => AttendanceShift::query()->where('department', $get('department'))->pluck('name', 'id')->toArray())
+                                            ->options(fn (Get $get) => AttendanceShift::query()->where('department', $get('department'))->pluck('name', 'id')->toArray())
                                             ->nullable(),
                                     ]),
-                                Forms\Components\Section::make('Salary')
+                                Section::make('Salary')
                                     ->schema([
-                                        Forms\Components\TextInput::make('salary')->numeric(),
-                                        Forms\Components\TextInput::make('salary_subscription')->numeric(),
-                                        Forms\Components\TextInput::make('salary_tax')->numeric(),
-                                        Forms\Components\Select::make('salary_period')
+                                        TextInput::make('salary')->numeric(),
+                                        TextInput::make('salary_subscription')->numeric(),
+                                        TextInput::make('salary_tax')->numeric(),
+                                        Select::make('salary_period')
                                             ->options([
                                                 'hour' => 'Hour',
                                                 'day' => 'Day',
@@ -218,72 +234,72 @@ class EmployeeResource extends Resource
                                                 'year' => 'Year',
                                             ]),
                                     ]),
-                                Forms\Components\Section::make('Bank')
+                                Section::make('Bank')
                                     ->schema([
-                                        Forms\Components\Toggle::make('has_bank_account')
+                                        Toggle::make('has_bank_account')
                                             ->live()
                                             ->default(false),
-                                        Forms\Components\TextInput::make('bank_name')
-                                            ->visible(fn(Forms\Get $get) => $get('has_bank_account')),
-                                        Forms\Components\TextInput::make('bank_branch')
-                                            ->visible(fn(Forms\Get $get) => $get('has_bank_account')),
-                                        Forms\Components\TextInput::make('bank_iban')
-                                            ->visible(fn(Forms\Get $get) => $get('has_bank_account')),
-                                        Forms\Components\TextInput::make('bank_swift')
-                                            ->visible(fn(Forms\Get $get) => $get('has_bank_account')),
-                                        Forms\Components\TextInput::make('bank_account')
-                                            ->visible(fn(Forms\Get $get) => $get('has_bank_account')),
+                                        TextInput::make('bank_name')
+                                            ->visible(fn (Get $get) => $get('has_bank_account')),
+                                        TextInput::make('bank_branch')
+                                            ->visible(fn (Get $get) => $get('has_bank_account')),
+                                        TextInput::make('bank_iban')
+                                            ->visible(fn (Get $get) => $get('has_bank_account')),
+                                        TextInput::make('bank_swift')
+                                            ->visible(fn (Get $get) => $get('has_bank_account')),
+                                        TextInput::make('bank_account')
+                                            ->visible(fn (Get $get) => $get('has_bank_account')),
                                     ]),
-                                Forms\Components\Section::make('Insurance')
+                                Section::make('Insurance')
                                     ->schema([
-                                        Forms\Components\Toggle::make('has_insurance')
+                                        Toggle::make('has_insurance')
                                             ->live()
                                             ->default(false),
-                                        Forms\Components\TextInput::make('insurance_number')
-                                            ->visible(fn(Forms\Get $get) => $get('has_insurance')),
-                                        Forms\Components\Toggle::make('has_medical_insurance')
+                                        TextInput::make('insurance_number')
+                                            ->visible(fn (Get $get) => $get('has_insurance')),
+                                        Toggle::make('has_medical_insurance')
                                             ->live()
                                             ->default(false),
-                                        Forms\Components\TextInput::make('medical_insurance_company')
-                                            ->visible(fn(Forms\Get $get) => $get('has_medical_insurance')),
-                                        Forms\Components\TextInput::make('medical_insurance_number')
-                                            ->visible(fn(Forms\Get $get) => $get('has_medical_insurance')),
-                                        Forms\Components\Datepicker::make('medical_insurance_start_at')
-                                            ->visible(fn(Forms\Get $get) => $get('has_medical_insurance')),
-                                        Forms\Components\Datepicker::make('medical_insurance_end_at')
-                                            ->visible(fn(Forms\Get $get) => $get('has_medical_insurance')),
+                                        TextInput::make('medical_insurance_company')
+                                            ->visible(fn (Get $get) => $get('has_medical_insurance')),
+                                        TextInput::make('medical_insurance_number')
+                                            ->visible(fn (Get $get) => $get('has_medical_insurance')),
+                                        DatePicker::make('medical_insurance_start_at')
+                                            ->visible(fn (Get $get) => $get('has_medical_insurance')),
+                                        DatePicker::make('medical_insurance_end_at')
+                                            ->visible(fn (Get $get) => $get('has_medical_insurance')),
                                     ]),
 
                             ])
                             ->columnSpan(4),
-                    ])
+                    ]),
 
             ] : [
-                Forms\Components\SpatieMediaLibraryFileUpload::make('avatar')
+                SpatieMediaLibraryFileUpload::make('avatar')
                     ->collection('avatar')
                     ->columnSpan(2)
                     ->avatar()
                     ->image()
                     ->alignCenter()
                     ->hiddenLabel()
-                    ->label(trans('filament-accounts::messages.accounts.coulmns.avatar')),
-                Forms\Components\TextInput::make('name')
+                    ->label(trans('filament-accounts::messages.accounts.columns.avatar')),
+                TextInput::make('name')
                     ->columnSpanFull()
                     ->maxLength(255),
-                Forms\Components\TextInput::make('email')
+                TextInput::make('email')
                     ->email()
-                    ->afterStateUpdated(function (Forms\Set $set, Forms\Get $get){
+                    ->afterStateUpdated(function (Set $set, Get $get) {
                         $set('username', $get('email'));
                     })
                     ->lazy()
-                    ->unique('accounts', 'email', ignorable: fn($record) => $record)
+                    ->unique('accounts', 'email', ignorable: fn ($record) => $record)
                     ->maxLength(255),
-                Forms\Components\Hidden::make('username'),
-                Forms\Components\Hidden::make('type')->default('employee'),
-                Forms\Components\TextInput::make('phone')
+                Hidden::make('username'),
+                Hidden::make('type')->default('employee'),
+                TextInput::make('phone')
                     ->tel()
                     ->maxLength(255),
-                Forms\Components\Textarea::make('address')
+                Textarea::make('address')
                     ->columnSpanFull(),
             ]);
     }
@@ -296,44 +312,44 @@ class EmployeeResource extends Resource
             })
             ->columns([
                 AccountColumn::make('id')
-                    ->label(trans('filament-accounts::messages.accounts.coulmns.id')),
-                Tables\Columns\TextColumn::make('name')
-                    ->label(trans('filament-accounts::messages.accounts.coulmns.name'))
+                    ->label(trans('filament-accounts::messages.accounts.columns.id')),
+                TextColumn::make('name')
+                    ->label(trans('filament-accounts::messages.accounts.columns.name'))
                     ->toggleable()
                     ->toggleable(isToggledHiddenByDefault: true)
                     ->sortable()
                     ->searchable(),
-                Tables\Columns\TextColumn::make('email')
-                    ->label(trans('filament-accounts::messages.accounts.coulmns.email'))
+                TextColumn::make('email')
+                    ->label(trans('filament-accounts::messages.accounts.columns.email'))
                     ->toggleable(isToggledHiddenByDefault: true)
                     ->sortable()
                     ->searchable(),
-                Tables\Columns\TextColumn::make('phone')
-                    ->label(trans('filament-accounts::messages.accounts.coulmns.phone'))
+                TextColumn::make('phone')
+                    ->label(trans('filament-accounts::messages.accounts.columns.phone'))
                     ->toggleable(isToggledHiddenByDefault: true)
                     ->sortable()
                     ->searchable(),
-                Tables\Columns\IconColumn::make('is_login')
-                    ->label(trans('filament-accounts::messages.accounts.coulmns.is_login'))
+                IconColumn::make('is_login')
+                    ->label(trans('filament-accounts::messages.accounts.columns.is_login'))
                     ->toggleable(isToggledHiddenByDefault: true)
                     ->sortable()
                     ->boolean(),
-                Tables\Columns\IconColumn::make('is_active')
-                    ->label(trans('filament-accounts::messages.accounts.coulmns.is_active'))
+                IconColumn::make('is_active')
+                    ->label(trans('filament-accounts::messages.accounts.columns.is_active'))
                     ->toggleable(isToggledHiddenByDefault: true)
                     ->sortable()
                     ->boolean(),
-                Tables\Columns\TextColumn::make('deleted_at')
+                TextColumn::make('deleted_at')
                     ->sortable()
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
-                Tables\Columns\TextColumn::make('created_at')
+                TextColumn::make('created_at')
                     ->sortable()
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
-                Tables\Columns\TextColumn::make('updated_at')
+                TextColumn::make('updated_at')
                     ->sortable()
                     ->dateTime()
                     ->sortable()
@@ -342,12 +358,12 @@ class EmployeeResource extends Resource
             ->filters([
                 //
             ])
-            ->actions([
-                Tables\Actions\EditAction::make(),
+            ->recordActions([
+                EditAction::make(),
             ])
-            ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
+            ->toolbarActions([
+                BulkActionGroup::make([
+                    DeleteBulkAction::make(),
                 ]),
             ]);
     }
@@ -355,18 +371,18 @@ class EmployeeResource extends Resource
     public static function getRelations(): array
     {
         return [
-            RelationManagers\EmployeeAttendanceRelation::class,
-            RelationManagers\EmployeePaymentRelation::class,
-            RelationManagers\EmployeeRequestRelation::class,
-            RelationManagers\EmployeePayrollRelation::class,
+            EmployeeAttendanceRelation::class,
+            EmployeePaymentRelation::class,
+            EmployeeRequestRelation::class,
+            EmployeePayrollRelation::class,
         ];
     }
 
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListAccounts::route('/'),
-            'edit' => Pages\EditAccount::route('/{record}/edit'),
+            'index' => ListAccounts::route('/'),
+            'edit' => EditAccount::route('/{record}/edit'),
         ];
     }
 }

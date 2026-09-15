@@ -17,23 +17,23 @@ return new class extends Migration
             $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
             $table->foreignId('account_id')->constrained('accounts')->onDelete('cascade');
 
-            //Date
+            // Date
             $table->string('year');
             $table->string('month');
             $table->dateTime('date');
 
-            //Collect Time
+            // Collect Time
             $table->double('total_time')->default(0)->nullable();
             $table->double('offs_time')->default(0)->nullable();
             $table->double('overtime_time')->default(0)->nullable();
             $table->double('delay_time')->default(0)->nullable();
 
-            //Collect Money
+            // Collect Money
             $table->double('out_date_payments')->default(0)->nullable();
             $table->double('subscription')->default(0)->nullable();
             $table->double('tax')->default(0)->nullable();
 
-            //Collect Total
+            // Collect Total
             $table->double('total')->default(0)->nullable();
 
             $table->timestamps();

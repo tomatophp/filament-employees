@@ -3,13 +3,13 @@
 namespace TomatoPHP\FilamentEmployees\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use TomatoPHP\FilamentEmployees\Models\User;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
- * @property integer $id
- * @property integer $employee_id
- * @property integer $user_id
- * @property integer $request_by
+ * @property int $id
+ * @property int $employee_id
+ * @property int $user_id
+ * @property int $request_by
  * @property string $type
  * @property string $from
  * @property string $to
@@ -17,8 +17,8 @@ use TomatoPHP\FilamentEmployees\Models\User;
  * @property string $request_message
  * @property string $request_response
  * @property string $status
- * @property boolean $is_activated
- * @property boolean $is_approved
+ * @property bool $is_activated
+ * @property bool $is_approved
  * @property string $created_at
  * @property string $updated_at
  * @property Employee $employee
@@ -30,7 +30,7 @@ class EmployeeRequest extends Model
     /**
      * @var array
      */
-    protected $fillable = ['account_id', 'user_id','amount', 'request_by', 'type', 'from', 'to', 'total', 'request_message', 'request_response', 'status', 'is_activated', 'is_approved', 'created_at', 'updated_at'];
+    protected $fillable = ['account_id', 'user_id', 'amount', 'request_by', 'type', 'from', 'to', 'total', 'request_message', 'request_response', 'status', 'is_activated', 'is_approved', 'created_at', 'updated_at'];
 
     protected $casts = [
         'from' => 'date',
@@ -38,8 +38,9 @@ class EmployeeRequest extends Model
         'is_activated' => 'boolean',
         'is_approved' => 'boolean',
     ];
+
     /**
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     * @return BelongsTo
      */
     public function account()
     {
@@ -47,18 +48,18 @@ class EmployeeRequest extends Model
     }
 
     /**
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     * @return BelongsTo
      */
     public function requestBy()
     {
-        return $this->belongsTo(\App\Models\User::class, 'request_by');
+        return $this->belongsTo(config('auth.providers.users.model'), 'request_by');
     }
 
     /**
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     * @return BelongsTo
      */
     public function user()
     {
-        return $this->belongsTo(\App\Models\User::class);
+        return $this->belongsTo(config('auth.providers.users.model'));
     }
 }

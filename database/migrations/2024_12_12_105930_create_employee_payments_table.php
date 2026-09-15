@@ -17,10 +17,10 @@ return new class extends Migration
             $table->foreignId('user_id')->nullable()->constrained('users')->onDelete('cascade');
             $table->foreignId('account_id')->constrained('accounts')->onDelete('cascade');
 
-            //Date
+            // Date
             $table->dateTime('date')->nullable();
 
-            //Data
+            // Data
             $table->string('reason')->default('payment');
             $table->string('type')->default('in');
             $table->text('description')->nullable();

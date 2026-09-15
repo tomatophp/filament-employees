@@ -2,9 +2,10 @@
 
 namespace TomatoPHP\FilamentEmployees\Filament\Resources\EmployeeApplyResource\Pages;
 
-use TomatoPHP\FilamentEmployees\Filament\Resources\EmployeeApplyResource;
-use Filament\Actions;
+use Filament\Actions\Action;
+use Filament\Actions\CreateAction;
 use Filament\Resources\Pages\ListRecords;
+use TomatoPHP\FilamentEmployees\Filament\Resources\EmployeeApplyResource;
 
 class ListEmployeeApplies extends ListRecords
 {
@@ -13,13 +14,13 @@ class ListEmployeeApplies extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
-            Actions\CreateAction::make(),
-            Actions\Action::make('types')
+            CreateAction::make(),
+            Action::make('types')
                 ->icon('heroicon-s-cog')
                 ->tooltip('Apply Status')
                 ->label('Apply Status')
                 ->hiddenLabel()
-                ->url(EmployeeApplyStatus::getUrl())
+                ->url(EmployeeApplyStatus::getUrl()),
         ];
     }
 }

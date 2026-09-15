@@ -2,10 +2,9 @@
 
 namespace TomatoPHP\FilamentEmployees\Filament\Resources\AttendanceShiftResource\Pages;
 
+use Filament\Actions\CreateAction;
 use Filament\Resources\Pages\ManageRecords;
 use TomatoPHP\FilamentEmployees\Filament\Resources\AttendanceShiftResource;
-use Filament\Actions;
-use Filament\Resources\Pages\ListRecords;
 
 class ListAttendanceShifts extends ManageRecords
 {
@@ -14,7 +13,7 @@ class ListAttendanceShifts extends ManageRecords
     protected function getHeaderActions(): array
     {
         return [
-            Actions\CreateAction::make(),
+            CreateAction::make(),
         ];
     }
 }

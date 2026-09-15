@@ -2,15 +2,21 @@
 
 namespace TomatoPHP\FilamentEmployees\Filament\Resources\EmployeeResource\RelationManagers;
 
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\CreateAction;
+use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\EditAction;
+use Filament\Forms\Components\DateTimePicker;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Toggle;
 use Filament\Resources\RelationManagers\RelationManager;
-use TomatoPHP\FilamentEmployees\Models\EmployeeRequest;
-use Filament\Forms;
-use Filament\Forms\Form;
-use Filament\Resources\Resource;
-use Filament\Tables;
+use Filament\Schemas\Schema;
+use Filament\Tables\Columns\IconColumn;
+use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
+use TomatoPHP\FilamentEmployees\Models\EmployeeRequest;
 use TomatoPHP\FilamentTypes\Components\TypeColumn;
 use TomatoPHP\FilamentTypes\Models\Type;
 
@@ -20,34 +26,34 @@ class EmployeeRequestRelation extends RelationManager
 
     protected static ?string $title = 'Requests';
 
-    public function form(Form $form): Form
+    public function form(Schema $schema): Schema
     {
-        return $form
-            ->schema([
-                Forms\Components\TextInput::make('type')
+        return $schema
+            ->components([
+                TextInput::make('type')
                     ->maxLength(255)
                     ->default('holiday'),
-                Forms\Components\DateTimePicker::make('from'),
-                Forms\Components\DateTimePicker::make('to'),
-                Forms\Components\TextInput::make('amount')
+                DateTimePicker::make('from'),
+                DateTimePicker::make('to'),
+                TextInput::make('amount')
                     ->numeric()
                     ->default(0),
-                Forms\Components\TextInput::make('total')
+                TextInput::make('total')
                     ->numeric()
                     ->default(0),
-                Forms\Components\Textarea::make('request_message')
+                Textarea::make('request_message')
                     ->columnSpanFull(),
-                Forms\Components\Textarea::make('request_response')
+                Textarea::make('request_response')
                     ->columnSpanFull(),
-                Forms\Components\TextInput::make('request_by')
+                TextInput::make('request_by')
                     ->numeric(),
-                Forms\Components\Select::make('status')
+                Select::make('status')
                     ->searchable()
                     ->required()
                     ->options(Type::query()->where('for', 'employees_request')->where('type', 'status')->pluck('name', 'key')->toArray())
                     ->default('pending'),
-                Forms\Components\Toggle::make('is_activated'),
-                Forms\Components\Toggle::make('is_approved'),
+                Toggle::make('is_activated'),
+                Toggle::make('is_approved'),
             ]);
     }
 
@@ -55,34 +61,35 @@ class EmployeeRequestRelation extends RelationManager
     {
         return $table
             ->headerActions([
-                Tables\Actions\CreateAction::make()
+                CreateAction::make()
                     ->using(function (array $data) {
                         $data['user_id'] = auth()->user()->id;
                         $data['account_id'] = $this->getOwnerRecord()->id;
 
                         $record = EmployeeRequest::create($data);
+
                         return $record;
                     }),
             ])
             ->columns([
-                Tables\Columns\TextColumn::make('user.name')
+                TextColumn::make('user.name')
                     ->numeric()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('type')
+                TextColumn::make('type')
                     ->searchable(),
-                Tables\Columns\TextColumn::make('from')
+                TextColumn::make('from')
                     ->dateTime()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('to')
+                TextColumn::make('to')
                     ->dateTime()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('amount')
+                TextColumn::make('amount')
                     ->numeric()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('total')
+                TextColumn::make('total')
                     ->numeric()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('request_by')
+                TextColumn::make('request_by')
                     ->numeric()
                     ->sortable(),
                 TypeColumn::make('status')
@@ -90,15 +97,15 @@ class EmployeeRequestRelation extends RelationManager
                     ->toggleable()
                     ->sortable()
                     ->searchable(),
-                Tables\Columns\IconColumn::make('is_activated')
+                IconColumn::make('is_activated')
                     ->boolean(),
-                Tables\Columns\IconColumn::make('is_approved')
+                IconColumn::make('is_approved')
                     ->boolean(),
-                Tables\Columns\TextColumn::make('created_at')
+                TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
-                Tables\Columns\TextColumn::make('updated_at')
+                TextColumn::make('updated_at')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
@@ -106,12 +113,12 @@ class EmployeeRequestRelation extends RelationManager
             ->filters([
                 //
             ])
-            ->actions([
-                Tables\Actions\EditAction::make(),
+            ->recordActions([
+                EditAction::make(),
             ])
-            ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
+            ->toolbarActions([
+                BulkActionGroup::make([
+                    DeleteBulkAction::make(),
                 ]),
             ]);
     }

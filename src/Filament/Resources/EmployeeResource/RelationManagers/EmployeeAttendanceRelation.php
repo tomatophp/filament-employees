@@ -2,18 +2,22 @@
 
 namespace TomatoPHP\FilamentEmployees\Filament\Resources\EmployeeResource\RelationManagers;
 
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\CreateAction;
+use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\EditAction;
+use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TimePicker;
 use Filament\Resources\RelationManagers\RelationManager;
+use Filament\Schemas\Components\Utilities\Get;
+use Filament\Schemas\Schema;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Table;
 use Illuminate\Support\Carbon;
 use TomatoPHP\FilamentEmployees\Models\AttendanceShift;
 use TomatoPHP\FilamentEmployees\Models\EmployeeAttendance;
-use Filament\Forms;
-use Filament\Forms\Form;
-use Filament\Resources\Resource;
-use Filament\Tables;
-use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
-use TomatoPHP\FilamentTypes\Models\Type;
 
 class EmployeeAttendanceRelation extends RelationManager
 {
@@ -21,15 +25,15 @@ class EmployeeAttendanceRelation extends RelationManager
 
     protected static ?string $title = 'Attendances';
 
-    public function form(Form $form): Form
+    public function form(Schema $schema): Schema
     {
-        return $form
-            ->schema([
-                Forms\Components\DatePicker::make('date')
+        return $schema
+            ->components([
+                DatePicker::make('date')
                     ->date()
                     ->default(date('Y-m-d'))
                     ->required(),
-                Forms\Components\Select::make('source')
+                Select::make('source')
                     ->searchable()
                     ->required()
                     ->options([
@@ -37,13 +41,13 @@ class EmployeeAttendanceRelation extends RelationManager
                         'manual' => 'Manual',
                     ])
                     ->default('manual'),
-                Forms\Components\TimePicker::make('in_at')
+                TimePicker::make('in_at')
                     ->time('H:i A')
                     ->required(),
-                Forms\Components\TimePicker::make('out_at')
-                    ->minDate(fn(Forms\Get $get) => Carbon::parse($get('in_at'))->addHour()->toTimeString())
+                TimePicker::make('out_at')
+                    ->minDate(fn (Get $get) => Carbon::parse($get('in_at'))->addHour()->toTimeString())
                     ->time('H:i A'),
-                Forms\Components\Textarea::make('notes')
+                Textarea::make('notes')
                     ->columnSpanFull(),
             ]);
     }
@@ -52,51 +56,52 @@ class EmployeeAttendanceRelation extends RelationManager
     {
         return $table
             ->headerActions([
-                Tables\Actions\CreateAction::make()
+                CreateAction::make()
                     ->using(function (array $data) {
                         $data['user_id'] = auth()->user()->id;
                         $data['account_id'] = $this->getOwnerRecord()->id;
-                        $data['department'] = $this->getOwnerRecord()->meta('department');
-                        if($data['notes']){
-                            $data['notes_by'] = auth()->user()->id;
+                        $data['department'] = $this->getOwnerRecord()->meta('department') ?? '';
+                        if (! empty($data['notes'])) {
+                            $data['note_by'] = auth()->user()->id;
                         }
 
                         $this->getTimes($data);
 
                         $record = EmployeeAttendance::create($data);
+
                         return $record;
                     }),
             ])
             ->columns([
-                Tables\Columns\TextColumn::make('user.name')
+                TextColumn::make('user.name')
                     ->numeric()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('department')
+                TextColumn::make('department')
                     ->searchable(),
-                Tables\Columns\TextColumn::make('date')
+                TextColumn::make('date')
                     ->date()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('source')
+                TextColumn::make('source')
                     ->searchable(),
-                Tables\Columns\TextColumn::make('in_at'),
-                Tables\Columns\TextColumn::make('out_at'),
-                Tables\Columns\TextColumn::make('delay')
+                TextColumn::make('in_at'),
+                TextColumn::make('out_at'),
+                TextColumn::make('delay')
                     ->numeric()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('overtime')
+                TextColumn::make('overtime')
                     ->numeric()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('total')
+                TextColumn::make('total')
                     ->numeric()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('note_by')
+                TextColumn::make('note_by')
                     ->numeric()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('created_at')
+                TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
-                Tables\Columns\TextColumn::make('updated_at')
+                TextColumn::make('updated_at')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
@@ -104,21 +109,22 @@ class EmployeeAttendanceRelation extends RelationManager
             ->filters([
                 //
             ])
-            ->actions([
-                Tables\Actions\EditAction::make()->using(function (array $data, $record) {
-                    if($data['notes']){
-                        $data['notes_by'] = auth()->user()->id;
+            ->recordActions([
+                EditAction::make()->using(function (array $data, $record) {
+                    if (! empty($data['notes'])) {
+                        $data['note_by'] = auth()->user()->id;
                     }
 
                     $this->getTimes($data);
 
                     $record->update($data);
+
                     return $record;
                 }),
             ])
-            ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
+            ->toolbarActions([
+                BulkActionGroup::make([
+                    DeleteBulkAction::make(),
                 ]),
             ]);
     }
@@ -129,19 +135,18 @@ class EmployeeAttendanceRelation extends RelationManager
         $delay = 0;
         $overtime = 0;
         $overTimeInNagtive = 0;
-        if(!empty($data['out_at']) && !empty($data['in_at'])){
+        if (! empty($data['out_at']) && ! empty($data['in_at'])) {
             $total = Carbon::parse($data['in_at'])->diffInMinutes(Carbon::parse($data['out_at']));
             $attendanceShift = AttendanceShift::find($this->getOwnerRecord()->meta('attendance_shift_id'));
-            if($attendanceShift){
+            if ($attendanceShift) {
                 $delay = Carbon::parse($attendanceShift->start_at)->diffInMinutes(Carbon::parse($data['in_at']));
                 $overtime = Carbon::parse($attendanceShift->end_at)->diffInMinutes(Carbon::parse($data['out_at']));
+                $overTimeInNagtive = ($total / 60) - (Carbon::parse($attendanceShift->start_at)->diffInMinutes(Carbon::parse($attendanceShift->end_at)) / 60);
             }
 
-            $overTimeInNagtive = ($total/60) - (Carbon::parse($attendanceShift->start_at)->diffInMinutes(Carbon::parse($attendanceShift->end_at))/60);
-
         }
-        $data["total"] = $total/60;
-        $data["delay"] = $delay > 0 ? (($delay/60) > 0 ? $delay/60 : 0) : 0;
-        $data["overtime"] = $overtime > 0 ? (($overtime/60) > 0 ? $overtime/60 : ($overTimeInNagtive?:0)) : 0;
+        $data['total'] = $total / 60;
+        $data['delay'] = $delay > 0 ? (($delay / 60) > 0 ? $delay / 60 : 0) : 0;
+        $data['overtime'] = $overtime > 0 ? (($overtime / 60) > 0 ? $overtime / 60 : ($overTimeInNagtive ?: 0)) : 0;
     }
 }

@@ -3,14 +3,14 @@
 namespace TomatoPHP\FilamentEmployees\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use TomatoPHP\FilamentEmployees\Models\User;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
- * @property integer $id
- * @property integer $user_id
- * @property integer $employee_id
- * @property integer $department_id
- * @property integer $note_by
+ * @property int $id
+ * @property int $user_id
+ * @property int $employee_id
+ * @property int $department_id
+ * @property int $note_by
  * @property string $date
  * @property string $source
  * @property string $in_at
@@ -33,9 +33,8 @@ class EmployeeAttendance extends Model
      */
     protected $fillable = ['user_id', 'account_id', 'department', 'note_by', 'date', 'source', 'in_at', 'out_at', 'delay', 'overtime', 'total', 'notes', 'created_at', 'updated_at'];
 
-
     /**
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     * @return BelongsTo
      */
     public function account()
     {
@@ -43,18 +42,18 @@ class EmployeeAttendance extends Model
     }
 
     /**
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     * @return BelongsTo
      */
     public function noteBy()
     {
-        return $this->belongsTo(\App\Models\User::class, 'note_by');
+        return $this->belongsTo(config('auth.providers.users.model'), 'note_by');
     }
 
     /**
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     * @return BelongsTo
      */
     public function user()
     {
-        return $this->belongsTo(\App\Models\User::class);
+        return $this->belongsTo(config('auth.providers.users.model'));
     }
 }

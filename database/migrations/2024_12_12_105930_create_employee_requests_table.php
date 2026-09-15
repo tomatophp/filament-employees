@@ -14,29 +14,29 @@ return new class extends Migration
         Schema::create('employee_requests', function (Blueprint $table) {
             $table->id();
 
-            //Refs
+            // Refs
             $table->foreignId('account_id')->constrained('accounts')->onDelete('cascade');
             $table->foreignId('user_id')->nullable()->constrained()->onDelete('cascade');
 
             $table->string('type')->default('holiday')->nullable();
 
-            //Dates
+            // Dates
             $table->dateTime('from')->nullable();
             $table->dateTime('to')->nullable();
 
-            //Count
+            // Count
             $table->double('amount')->default(0)->nullable();
             $table->double('total')->default(0)->nullable();
 
-            //Reason
+            // Reason
             $table->text('request_message')->nullable();
             $table->text('request_response')->nullable();
             $table->foreignId('request_by')->nullable()->constrained('users')->onDelete('cascade');
 
-            //Status
+            // Status
             $table->string('status')->default('pending')->nullable();
 
-            //Options
+            // Options
             $table->boolean('is_activated')->default(0)->nullable();
             $table->boolean('is_approved')->default(0)->nullable();
 

@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('employee_applies', function (Blueprint $table) {
             $table->id();
-            //Data
+            // Data
             $table->string('first_name');
             $table->string('last_name');
             $table->text('address');
@@ -24,13 +24,13 @@ return new class extends Migration
             $table->string('id_type')->default('national');
             $table->string('id_number');
 
-            //Education
+            // Education
             $table->string('education_type')->nullable();
             $table->string('university')->nullable();
             $table->string('college')->nullable();
             $table->string('department')->nullable();
 
-            //HR
+            // HR
             $table->string('position');
             $table->text('hr_cover_letter')->nullable();
             $table->boolean('has_insurance')->default(0);
@@ -38,14 +38,14 @@ return new class extends Migration
             $table->double('explicated_salary')->default(0);
             $table->date('start_at')->nullable();
 
-            //Status
+            // Status
             $table->string('status')->default('pending');
 
-            //HR Notes
+            // HR Notes
             $table->text('hr_notes')->nullable();
             $table->text('tech_notes')->nullable();
 
-            //Options
+            // Options
             $table->boolean('is_activated')->default(0)->nullable();
             $table->boolean('ready_for_interview')->default(0)->nullable();
             $table->boolean('hr_approved')->default(0)->nullable();
@@ -64,6 +64,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('applies');
+        Schema::dropIfExists('employee_applies');
     }
 };

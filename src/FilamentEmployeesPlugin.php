@@ -4,11 +4,14 @@ namespace TomatoPHP\FilamentEmployees;
 
 use Filament\Contracts\Plugin;
 use Filament\Panel;
-use TomatoPHP\FilamentAccounts\FilamentAccountsPlugin;
-use TomatoPHP\FilamentEmployees\Filament\Resources\EmployeeResource;
 use TomatoPHP\FilamentEmployees\Filament\Resources\AttendanceShiftResource;
 use TomatoPHP\FilamentEmployees\Filament\Resources\EmployeeApplyResource;
-
+use TomatoPHP\FilamentEmployees\Filament\Resources\EmployeeApplyResource\Pages\EmployeeApplyStatus;
+use TomatoPHP\FilamentEmployees\Filament\Resources\EmployeeResource;
+use TomatoPHP\FilamentEmployees\Filament\Resources\EmployeeResource\Pages\Departments;
+use TomatoPHP\FilamentEmployees\Filament\Resources\EmployeeResource\Pages\EmployeePaymentsStatus;
+use TomatoPHP\FilamentEmployees\Filament\Resources\EmployeeResource\Pages\EmployeePaymentsType;
+use TomatoPHP\FilamentEmployees\Filament\Resources\EmployeeResource\Pages\EmployeeRequestsStatus;
 
 class FilamentEmployeesPlugin implements Plugin
 {
@@ -22,15 +25,15 @@ class FilamentEmployeesPlugin implements Plugin
         $panel->resources([
             EmployeeResource::class,
             AttendanceShiftResource::class,
-            EmployeeApplyResource::class
+            EmployeeApplyResource::class,
         ])
-        ->pages([
-            Filament\Resources\EmployeeResource\Pages\EmployeePaymentsStatus::class,
-            Filament\Resources\EmployeeResource\Pages\EmployeePaymentsType::class,
-            Filament\Resources\EmployeeResource\Pages\EmployeeRequestsStatus::class,
-            Filament\Resources\EmployeeResource\Pages\Departments::class,
-            Filament\Resources\EmployeeApplyResource\Pages\EmployeeApplyStatus::class,
-        ]);
+            ->pages([
+                EmployeePaymentsStatus::class,
+                EmployeePaymentsType::class,
+                EmployeeRequestsStatus::class,
+                Departments::class,
+                EmployeeApplyStatus::class,
+            ]);
     }
 
     public function boot(Panel $panel): void
@@ -38,8 +41,8 @@ class FilamentEmployeesPlugin implements Plugin
         //
     }
 
-    public static function make(): static
+    public static function make(): self
     {
-        return new static();
+        return new self;
     }
 }

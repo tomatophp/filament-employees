@@ -14,26 +14,26 @@ return new class extends Migration
         Schema::create('employee_attendances', function (Blueprint $table) {
             $table->id();
 
-            //Refs
+            // Refs
             $table->foreignId('user_id')->nullable()->constrained('users')->onDelete('cascade');
             $table->foreignId('account_id')->constrained('accounts')->onDelete('cascade');
             $table->string('department');
 
             $table->date('date');
 
-            //Source
+            // Source
             $table->string('source')->default('fingerprint')->nullable();
 
-            //Data
+            // Data
             $table->time('in_at');
             $table->time('out_at')->nullable();
 
-            //Counters
+            // Counters
             $table->double('delay')->default(0)->nullable();
             $table->double('overtime')->default(0)->nullable();
             $table->double('total')->default(0)->nullable();
 
-            //Notes
+            // Notes
             $table->text('notes')->nullable();
             $table->foreignId('note_by')->nullable()->constrained('users')->onDelete('cascade');
 
@@ -46,6 +46,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('employee_attends');
+        Schema::dropIfExists('employee_attendances');
     }
 };

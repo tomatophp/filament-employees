@@ -8,17 +8,16 @@ class EmployeeRequestsStatus extends BaseTypePage
 {
     public function getType(): string
     {
-        return "status";
+        return 'status';
     }
 
     public function getFor(): string
     {
-        return "employees_request";
+        return 'employees_request';
     }
-
 
     public function getTitle(): string
     {
-        return "Employee Requests Status";
+        return 'Employee Requests Status';
     }
 }

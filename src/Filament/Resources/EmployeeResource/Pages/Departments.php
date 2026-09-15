@@ -8,18 +8,16 @@ class Departments extends BaseTypePage
 {
     public function getType(): string
     {
-        return "departments";
+        return 'departments';
     }
 
     public function getFor(): string
     {
-        return "employees";
+        return 'employees';
     }
-
 
     public function getTitle(): string
     {
-        return "Departments";
+        return 'Departments';
     }
-
 }
