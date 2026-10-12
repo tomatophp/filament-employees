@@ -2,6 +2,12 @@
     "name": "tomatophp/filament-employees",
     "type": "library",
     "description": "Manage your employees with easy using Account builder and FilamentPHP",
+    "homepage": "https://tomatophp.com/en/plugins/filament-employees",
+    "support": {
+        "issues": "https://github.com/tomatophp/filament-employees/issues",
+        "source": "https://github.com/tomatophp/filament-employees",
+        "docs": "https://tomatophp.com/en/plugins/filament-employees"
+    },
     "keywords": [
         "php",
         "laravel",
